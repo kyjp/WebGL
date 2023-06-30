@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
-export default function Home() {
+const Sample03 = () => {
   const canvas = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     if (!canvas) return
@@ -26,37 +27,39 @@ export default function Home() {
       window.innerWidth,
       window.innerHeight
     )
-    // 立方体を定義
-    const geometry = new THREE.BoxGeometry()
-    // マテリアルの作成
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-    // メッシュの作成
-    const cube = new THREE.Mesh(geometry, material)
-    // シーンに追加
-    scene.add(cube)
-    camera.position.z = 5
 
+    // ドーナツの作成時に使用
+    const geometry = new THREE.TorusGeometry()
+
+    const material = new THREE.MeshBasicMaterial({
+      color: 'yellow'
+    })
+    const cube = new THREE.Mesh(geometry, material)
+    scene.add(cube)
+    // HTMLElementしか入らなかったので次の行のtsエラーを無視
+    // @ts-ignore
+    const control = new OrbitControls(camera, canvas.current)
+    // 慣性の追加
+    control.enableDamping = true
+    control.autoRotate = true
+
+    camera.position.z = 5
     const animate = () => {
       // 最適なタイミングでコールバック関数を実行
       requestAnimationFrame(animate)
-
-      cube.rotation.x += 0.01
-      cube.rotation.y += 0.01
-
+      // 慣性を追加したときのみ必要
+      control.update()
       // canvasに描写
       renderer.render(scene, camera)
     }
-
     animate()
-
-    return () => {
-
-    }
   }, [])
 
   return (
     <>
-      <canvas ref={canvas}></canvas>
+      <canvas ref={canvas} />
     </>
   )
 }
+
+export default Sample03
